@@ -1,0 +1,61 @@
+#version: '3.8'
+#
+#services:
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - db
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/public_data
+#      SPRING_DATASOURCE_USERNAME: root
+#      SPRING_DATASOURCE_PASSWORD: rootpassword
+#
+#  db:
+#    image: mysql:5.7
+#    ports:
+#      - "3307:3307"
+#    environment:
+#      MYSQL_DATABASE: public_data
+#      MYSQL_ROOT_PASSWORD: rootpassword
+#    volumes:
+#      - db-data:/var/lib/mysql
+#      - ./src/main/resources/your-database.sql:/docker-entrypoint-initdb.d/public_data.sql
+#    command: --default-authentication-plugin=mysql_native_password --skip-ssl --skip-grant-tables --init-file=/docker-entrypoint-initdb.d/public_data.sql
+#      # Adding tzdata to resolve timezone issues
+#    entrypoint: sh -c 'apt-get update && apt-get install -y tzdata && docker-entrypoint.sh mysqld'
+#
+#volumes:
+#  db-data:
+
+
+version: '3.8'
+services:
+  db:
+    image: mysql:5.7
+    container_name: my-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: public_data
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./src/main/resources/public_data.sql:/docker-entrypoint-initdb.d/public_data.sql
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/public_data
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    volumes:
+      - .:/app
+volumes:
+  db_data:
